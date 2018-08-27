@@ -1,0 +1,24 @@
+{
+  "name": "udf-node",
+  "version": "0.1.0",
+  "description": "UDF Data Source",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/L2QQ/udf-node.git"
+  },
+  "keywords": [
+    "udf",
+    "api",
+    "express"
+  ],
+  "author": "Vitaly Berg <bergusman@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/L2QQ/udf-node/issues"
+  },
+  "homepage": "https://github.com/L2QQ/udf-node#readme"
+}
