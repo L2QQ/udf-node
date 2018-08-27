@@ -20,5 +20,9 @@
   "bugs": {
     "url": "https://github.com/L2QQ/udf-node/issues"
   },
-  "homepage": "https://github.com/L2QQ/udf-node#readme"
+  "homepage": "https://github.com/L2QQ/udf-node#readme",
+  "dependencies": {
+    "express": "^4.16.3",
+    "morgan": "^1.9.0"
+  }
 }
