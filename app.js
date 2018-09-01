@@ -1,54 +1,86 @@
+/**
+ * Documentation for UDF API:
+ * https://github.com/tradingview/charting_library/wiki/UDF
+ */
+
+const commanderPort = parseInt(process.env.PORT) || 9040
+
+/**
+ * Setup express
+ */
+
 const express = require('express')
 const app = express()
 
 const morgan = require('morgan')
 app.use(morgan('tiny'))
 
-app.get('/config', (req, res) => {
-    res.send({
-        supports_search: true,
-        supports_group_request: false,
-        supports_marks: false,
-        supports_timescale_marks: false,
-        supports_time: true,
-        supported_resolutions: ['1', '3', '5', '15', '30', '60', '120', '240', '360', '480', '720', '1D', '3D', '1W', '1M']
+const cors = require('cors')
+app.use(cors())
+
+app.error = (status, message) => {
+    let err = new Error(message)
+    err.status = status
+    return err
+}
+
+/**
+ * Routing
+ */
+
+app.all('/', (req, res) => {
+    res.set('Content-Type', 'text/plain').send("📊 L2QQ UDF Data Provider")
+})
+
+app.use((req, res, next) => {
+    req.app.symbols.then(() => {
+        next()
+    }).catch((err) => {
+        next(err)
     })
 })
 
-app.get('/symbols', (req, res) => {
-    res.send({})
-})
+app.use(require('./src/routes/config'))
+app.use(require('./src/routes/symbols'))
+app.use(require('./src/routes/history'))
 
-app.get('/search', (req, res) => {
-    res.send({})
-})
-
-const klines = require('./src/klines')
-
-app.get('/history', (req, res) => {
-    klines().then(klines => {
-        res.send({
-            s: 'ok',
-            t: klines.map(k => Math.floor(k[0] / 1000)),
-            c: klines.map(k => parseFloat(k[4])),
-            o: klines.map(k => parseFloat(k[1])),
-            h: klines.map(k => parseFloat(k[2])),
-            l: klines.map(k => parseFloat(k[3])),
-            v: klines.map(k => parseFloat(k[5]))
-        })
+app.use((err, req, res, next) => {
+    res.status(err.status || 500).send({
+        s: 'error',
+        errmsg: err.message
     })
 })
 
-app.get('/time', (req, res) => {
-    const time = Math.floor(Date.now() / 1000)
-    res.send(time.toString())
+app.use((req, res) => {
+    res.set('Content-Type', 'text/plain').status(404).send("📊 L2QQ UDF Data Provider")
 })
+
+/**
+ * Listening
+ */
+
+const port = parseInt(process.env.PORT) || 9010
+app.listen(port, () => {
+    console.log(`Listen on ${port}`)
+})
+
+/**
+ * Symbols
+ */
 
 const rp = require('request-promise-native')
-rp('http://localhost:9040/config', { json: true }).then((config) => {
-    app.listen(9010, () => {
-        console.log('Listen')
-    })
-}).catch(err => {
-    console.error(err)
+
+app.symbols = rp({
+    uri: `http://localhost:${commanderPort}`,
+    json: true
+}).then((config) => {
+    app.klines = config.klines
+    return config.markets.map(m => ({
+        symbol: m.symbol,
+        base: m.base,
+        quote: m.quote,
+        pricescale: m.pricescale
+    }))
+}).catch(() => {
+    process.exit(1)
 })

@@ -22,7 +22,10 @@
   },
   "homepage": "https://github.com/L2QQ/udf-node#readme",
   "dependencies": {
+    "cors": "^2.8.4",
     "express": "^4.16.3",
-    "morgan": "^1.9.0"
+    "morgan": "^1.9.0",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.5"
   }
 }
