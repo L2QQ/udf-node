@@ -13,7 +13,7 @@ const rp = require('request-promise-native')
  */
 function klines(port, symbol, interval, from, to) {
     return rp({
-        uri: `http://localhost:${port}`,
+        uri: `http://localhost:${port}/ohlc`,
         qs: {
             symbol, interval, from, to
         },
