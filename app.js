@@ -33,7 +33,8 @@ app.all('/', (req, res) => {
 })
 
 app.use((req, res, next) => {
-    req.app.symbols.then(() => {
+    req.app.symbols.then((symbols) => {
+        req.symbols = symbols
         next()
     }).catch((err) => {
         next(err)

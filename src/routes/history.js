@@ -98,30 +98,28 @@ router.get('/history', (req, res, next) => {
 
     const symbol = req.query.symbol.toUpperCase()
 
-    req.app.symbols.then(symbols => {
-        if (!symbols.map(s => s.symbol).includes(symbol)) {
-            return next(req.app.error(404, 'Unknown symbol'))
+    if (!req.symbols.map(s => s.symbol).includes(symbol)) {
+        return next(req.app.error(404, 'Unknown symbol'))
+    }
+
+    klines(req.app.klines.port, symbol, interval, from, to).then((klines) => {
+        if (klines.length === 0) {
+            return res.send({
+                s: 'no_data'
+            })
         }
 
-        klines(req.app.klines.port, symbol, interval, from, to).then((klines) => {
-            if (klines.length === 0) {
-                return res.send({
-                    s: 'no_data'
-                })
-            }
-    
-            res.send({
-                s: 'ok',
-                t: klines.map(k => Math.floor(k[0] / 1000)),
-                c: klines.map(k => parseFloat(k[4])),
-                o: klines.map(k => parseFloat(k[1])),
-                h: klines.map(k => parseFloat(k[2])),
-                l: klines.map(k => parseFloat(k[3])),
-                v: klines.map(k => parseFloat(k[5]))
-            })
-        }).catch((err) => {
-            next(err)
+        res.send({
+            s: 'ok',
+            t: klines.map(k => Math.floor(k[0] / 1000)),
+            c: klines.map(k => parseFloat(k[4])),
+            o: klines.map(k => parseFloat(k[1])),
+            h: klines.map(k => parseFloat(k[2])),
+            l: klines.map(k => parseFloat(k[3])),
+            v: klines.map(k => parseFloat(k[5]))
         })
+    }).catch((err) => {
+        next(err)
     })
 })
 
