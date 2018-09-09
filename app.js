@@ -3,11 +3,10 @@
  * https://github.com/tradingview/charting_library/wiki/UDF
  */
 
-const commanderPort = parseInt(process.env.PORT) || 9040
+require('colors')
+console.log('📊 UDF Data Provider Service'.bold.black)
 
-/**
- * Setup express
- */
+const commanderPort = parseInt(process.env.PORT) || 9040
 
 const express = require('express')
 const app = express()
@@ -24,15 +23,13 @@ app.error = (status, message) => {
     return err
 }
 
-/**
- * Routing
- */
-
 app.all('/', (req, res) => {
     res.set('Content-Type', 'text/plain').send("📊 L2QQ UDF Data Provider")
 })
 
 app.use((req, res, next) => {
+    req.error = app.error
+
     req.app.symbols.then((symbols) => {
         req.symbols = symbols
         next()
@@ -56,18 +53,10 @@ app.use((req, res) => {
     res.set('Content-Type', 'text/plain').status(404).send("📊 L2QQ UDF Data Provider")
 })
 
-/**
- * Listening
- */
-
 const port = parseInt(process.env.PORT) || 9010
 app.listen(port, () => {
-    console.log(`Listen on ${port}`)
+    console.log('Listening on:',  String(port).green)
 })
-
-/**
- * Symbols
- */
 
 const rp = require('request-promise-native')
 

@@ -29,7 +29,7 @@ router.get('/symbol_info', (req, res) => {
  */
 router.get('/symbols', (req, res, next) => {
     if (!req.query.symbol) {
-        throw req.app.error(400, 'Symbol requered')
+        throw req.error(400, 'Symbol requered')
     }
 
     const comps = req.query.symbol.split(':')
@@ -56,7 +56,7 @@ router.get('/symbols', (req, res, next) => {
         }
     }
 
-    next(req.app.error(404, 'Unknown symbol'))
+    next(req.error(404, 'Unknown symbol'))
 })
 
 /**

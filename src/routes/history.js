@@ -49,16 +49,16 @@ function testKlines(port, symbol, interval, from, to) {
  */
 router.get('/history', (req, res, next) => {
     if (!req.query.symbol) {
-        throw req.app.error(400, 'Symbol requered')
+        throw req.error(400, 'Symbol requered')
     }
     if (!req.query.resolution) {
-        throw req.app.error(400, 'Resolution requered')
+        throw req.error(400, 'Resolution requered')
     }
     if (!req.query.from) {
-        throw req.app.error(400, 'From requered')
+        throw req.error(400, 'From requered')
     }
     if (!req.query.to) {
-        throw req.app.error(400, 'To requered')
+        throw req.error(400, 'To requered')
     }
 
     const interval = {
@@ -83,26 +83,26 @@ router.get('/history', (req, res, next) => {
     }[req.query.resolution]
 
     if (!interval) {
-        throw req.app.error(400, 'Invalid resolution')
+        throw req.error(400, 'Invalid resolution')
     }
 
     const from = parseInt(req.query.from) * 1000
     const to = parseInt(req.query.to) * 1000
 
     if (isNaN(from) || from < 0) {
-        throw req.app.error(400, 'from is not unix timestamp')
+        throw req.error(400, 'from is not unix timestamp')
     }
     if (isNaN(to) || to < 0) {
-        throw req.app.error(400, 'to is not unix timestamp')
+        throw req.error(400, 'to is not unix timestamp')
     }
 
     const symbol = req.query.symbol.toUpperCase()
 
     if (!req.symbols.map(s => s.symbol).includes(symbol)) {
-        return next(req.app.error(404, 'Unknown symbol'))
+        return next(req.error(404, 'Unknown symbol'))
     }
 
-    klines(req.app.klines.port, symbol, interval, from, to).then((klines) => {
+    klines(req.klines.port, symbol, interval, from, to).then((klines) => {
         if (klines.length === 0) {
             return res.send({
                 s: 'no_data'
