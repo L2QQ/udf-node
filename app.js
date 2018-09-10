@@ -27,6 +27,7 @@ app.all('/', (req, res) => {
 
 const OHLCV = require('../services-node/src/services/wrappers/ohlcv')
 const Commander = require('../services-node/src/services/wrappers/commander')
+
 const commander = new Commander(parseInt(process.env.COMMANDER_PORT) || 9040)
 commander.on('config', (config) => {
     console.log('Config changed'.magenta)
