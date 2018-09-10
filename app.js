@@ -4,9 +4,7 @@
  */
 
 require('colors')
-console.log('📊 UDF Data Provider Service'.bold.black)
-
-const commanderPort = parseInt(process.env.PORT) || 9040
+console.log('📊 UDF Data Provider Service'.bold)
 
 const express = require('express')
 const app = express()
@@ -27,15 +25,25 @@ app.all('/', (req, res) => {
     res.set('Content-Type', 'text/plain').send("📊 L2QQ UDF Data Provider")
 })
 
+const OHLCV = require('../services-node/src/services/wrappers/ohlcv')
+const Commander = require('../services-node/src/services/wrappers/commander')
+const commander = new Commander(parseInt(process.env.COMMANDER_PORT) || 9040)
+commander.on('config', (config) => {
+    console.log('Config changed'.magenta)
+    app.ohlcv = new OHLCV(config.services.ohlcv.port)
+    app.symbols = config.markets.map(m => ({
+        symbol: m.symbol,
+        base: m.base,
+        quote: m.quote,
+        pricescale: m.pricescale
+    }))
+})
+
 app.use((req, res, next) => {
     req.error = app.error
-
-    req.app.symbols.then((symbols) => {
-        req.symbols = symbols
-        next()
-    }).catch((err) => {
-        next(err)
-    })
+    req.symbols = app.symbols
+    req.ohlcv = app.ohlcv
+    next()
 })
 
 app.use(require('./src/routes/config'))
@@ -53,24 +61,10 @@ app.use((req, res) => {
     res.set('Content-Type', 'text/plain').status(404).send("📊 L2QQ UDF Data Provider")
 })
 
-const port = parseInt(process.env.PORT) || 9010
-app.listen(port, () => {
-    console.log('Listening on:',  String(port).green)
-})
-
-const rp = require('request-promise-native')
-
-app.symbols = rp({
-    uri: `http://localhost:${commanderPort}`,
-    json: true
-}).then((config) => {
-    app.klines = config.klines
-    return config.markets.map(m => ({
-        symbol: m.symbol,
-        base: m.base,
-        quote: m.quote,
-        pricescale: m.pricescale
-    }))
-}).catch(() => {
-    process.exit(1)
+commander.once('config', () => {
+    console.log('Took config once'.red)
+    const port = parseInt(process.env.PORT) || 9010
+    app.listen(port, () => {
+        console.log('Listening on:', String(port).green)
+    })
 })
