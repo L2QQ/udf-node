@@ -66,6 +66,6 @@ commander.once('config', () => {
     console.log('Took config once'.red)
     const port = parseInt(process.env.PORT) || 9010
     app.listen(port, () => {
-        console.log('Listening on:', String(port).green)
+        console.log('Listening on:', String(port).green, '\n')
     })
 })
